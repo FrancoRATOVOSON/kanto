@@ -2,12 +2,13 @@ import { Editable } from 'editable'
 
 const editor = document.getElementById('editor')
 
-function addLine() {
-  const newEditable = new Editable('basic')
-  newEditable.addKeyListener({ key: 'Enter', ctrl: true }, addLine)
+function addLine(editable: Editable) {
+  editable.addKeyListener({ key: 'Enter', ctrl: true }, () =>
+    addLine(new Editable({ newLine: 'basic' }))
+  )
 
-  editor?.appendChild(newEditable.Element)
-  newEditable.Element.focus()
+  editor?.appendChild(editable.Element)
+  editable.Element.focus()
 }
 
-addLine()
+addLine(new Editable({ newLine: 'basic', placeholder: 'First Line' }))
