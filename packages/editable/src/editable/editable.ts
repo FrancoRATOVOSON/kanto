@@ -106,14 +106,30 @@ export default class Editable {
     if (position === 'end') this.moveCursorToEnd()
   }
 
-  protected moveCursorToEnd() {
+  protected moveCursorTo(position: number | [number, number]) {
     const range = document.createRange()
     const selection = window.getSelection()
 
-    range.setStart(this.editable, this.editable.childNodes.length)
+    const rangeNodeIndex =
+      typeof position === 'number' ||
+      position[0] >= this.editable.childNodes.length
+        ? 0
+        : position[0]
+    const rangeNode =
+      rangeNodeIndex === 0
+        ? this.editable
+        : this.editable.childNodes[rangeNodeIndex]
+    range.setStart(
+      rangeNode,
+      typeof position === 'number' ? position : position[1]
+    )
     range.collapse(true)
     selection?.removeAllRanges()
     selection?.addRange(range)
+  }
+
+  protected moveCursorToEnd() {
+    this.moveCursorTo(this.editable.childNodes.length)
   }
 
   protected onNewLine(ev: KeyboardEvent) {

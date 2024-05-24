@@ -10,20 +10,18 @@ function addLine(editable: Editable) {
   )
   editable.setOnDeleteWhenEmpty(key => {
     const currentIndex = editorLines.findIndex(line => line === editable)
-
-    if (editorLines.length > 1) {
-      editor?.removeChild(editable.Element)
-      editorLines = editorLines.filter(line => line !== editable)
-    }
-
-    if (key === 'Backspace' && currentIndex > 0)
-      editorLines.at(currentIndex - 1)?.focus('end')
-    if (
+    const backspace = key === 'Backspace' && currentIndex > 0
+    const del =
       key === 'Delete' &&
       currentIndex >= 0 &&
-      currentIndex < editorLines.length
-    )
-      editorLines.at(currentIndex)?.focus()
+      currentIndex < editorLines.length - 1
+
+    if ((backspace || del) && editorLines.length > 1) {
+      editor?.removeChild(editable.Element)
+      editorLines = [...editorLines.filter(line => line !== editable)]
+
+      editorLines.at(backspace ? currentIndex - 1 : currentIndex)?.focus('end')
+    }
   })
 
   editor?.appendChild(editable.Element)
