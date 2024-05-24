@@ -4,7 +4,6 @@
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
-    "inlineSourceMap": true,
     "removeComments": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
