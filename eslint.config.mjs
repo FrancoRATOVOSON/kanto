@@ -38,6 +38,13 @@ export default [
             'method'
           ]
         }
+      ],
+      'perfectionist/sort-interfaces': [
+        'warn',
+        {
+          type: 'natural',
+          order: 'asc'
+        }
       ]
     }
   }

@@ -4,17 +4,21 @@ import {
   KeyMappingType,
   NewLineType
 } from '../utils'
-import { ENTERKEY } from '../utils/const'
+import { BACKSPACEKEY, DELETEKEY, ENTERKEY } from '../utils/const'
 
 import './editable.css'
 
 type NewEditableParams = {
-  element?: HTMLDivElement | null
   newLine?: NewLineType
+  element?: HTMLDivElement | null
   placeholder?: string
 }
 
 export default class Editable {
+  private onDeleteWhenEmpty: (
+    key: typeof BACKSPACEKEY | typeof DELETEKEY
+  ) => void = () => {}
+
   protected readonly editable: HTMLDivElement
   protected keyListeners: Array<KeyListenerType> = []
   protected newLine: NewLineType
@@ -31,8 +35,17 @@ export default class Editable {
     this.editable.addEventListener('emptied', () => {})
 
     this.editable.addEventListener('keydown', ev => {
-      const { key } = ev
+      const { key, altKey, ctrlKey, shiftKey } = ev
       if (key === ENTERKEY) ev.preventDefault()
+
+      if (!altKey && !ctrlKey && !shiftKey)
+        if (
+          this.editable.childNodes.length === 0 &&
+          (key === BACKSPACEKEY || key === DELETEKEY)
+        ) {
+          ev.preventDefault()
+          return this.onDeleteWhenEmpty(key)
+        }
 
       this.#_executeKeyListeners(ev)
       this.onNewLine(ev)
@@ -87,6 +100,12 @@ export default class Editable {
     this.editable.appendChild(document.createElement('br'))
   }
 
+  focus(position?: number | 'start' | 'end') {
+    this.editable.focus()
+
+    if (position === 'end') this.moveCursorToEnd()
+  }
+
   protected moveCursorToEnd() {
     const range = document.createRange()
     const selection = window.getSelection()
@@ -119,5 +138,11 @@ export default class Editable {
       this.addNewLine()
       this.moveCursorToEnd()
     }
+  }
+
+  setOnDeleteWhenEmpty(
+    action: (_key: typeof BACKSPACEKEY | typeof DELETEKEY) => void
+  ) {
+    this.onDeleteWhenEmpty = action
   }
 }
