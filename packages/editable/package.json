@@ -1,0 +1,17 @@
+{
+  "name": "editable",
+  "version": "0.1.0",
+  "description": "An HTML contenteditable javascript toolkit",
+  "source": "src/index.ts",
+  "main": "dist/main.js",
+  "module": "dist/module.js",
+  "types": "dist/types.d.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "watch": "parcel watch",
+    "build": "parcel build"
+  },
+  "license": "MIT"
+}
