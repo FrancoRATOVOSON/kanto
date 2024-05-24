@@ -22,7 +22,23 @@ export default [
       perfectionist
     },
     rules: {
-      'perfectionist/sort-interfaces': 'error'
+      'perfectionist/sort-classes': [
+        'warn',
+        {
+          type: 'natural',
+          order: 'asc',
+          groups: [
+            'index-signature',
+            'static-property',
+            'private-property',
+            'property',
+            'constructor',
+            'static-method',
+            'private-method',
+            'method'
+          ]
+        }
+      ]
     }
   }
 ]
