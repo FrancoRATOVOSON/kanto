@@ -109,7 +109,6 @@ export default class Editable {
   protected moveCursorTo(position: number | [number, number]) {
     const range = document.createRange()
     const selection = window.getSelection()
-
     const rangeNodeIndex =
       typeof position === 'number' ||
       position[0] >= this.editable.childNodes.length
@@ -119,6 +118,7 @@ export default class Editable {
       rangeNodeIndex === 0
         ? this.editable
         : this.editable.childNodes[rangeNodeIndex]
+
     range.setStart(
       rangeNode,
       typeof position === 'number' ? position : position[1]
