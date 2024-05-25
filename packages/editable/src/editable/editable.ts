@@ -107,15 +107,16 @@ export default class Editable {
     if (selection) {
       const range = selection.getRangeAt(0)
 
-      range.deleteContents()
-      range.collapse(true)
+      if (!isEmptyLine(range)) {
+        range.deleteContents()
+        range.collapse(true)
 
-      if (isEndOfLine(range) || isEmptyLine(range))
+        if (isEndOfLine(range)) range.insertNode(document.createTextNode('\n'))
         range.insertNode(document.createTextNode('\n'))
-      range.insertNode(document.createTextNode('\n'))
 
-      const newLineNode = getNextLineSibling(range.startContainer)
-      if (newLineNode) this.moveCursorTo(newLineNode)
+        const newLineNode = getNextLineSibling(range.startContainer)
+        if (newLineNode) this.moveCursorTo(newLineNode)
+      }
     }
   }
 
