@@ -54,18 +54,23 @@ export default class Editable {
         }
       }
 
-      this.#_executeKeyListeners(ev)
+      this.executeKeyListeners(ev)
       this.onNewLine(ev)
     })
   }
 
-  #_executeKeyListeners({ key, shiftKey, altKey, ctrlKey }: KeyboardEvent) {
+  private executeKeyListeners({
+    key,
+    shiftKey,
+    altKey,
+    ctrlKey
+  }: KeyboardEvent) {
     this.keyListeners.forEach(
       ({
         keyMap: { alt = false, ctrl = false, key: mapKey = '', shift = false },
         listener
       }) => {
-        if (this.#_isNewLineKeyMap({ alt, ctrl, key, shift })) return
+        if (this.isNewLineKeyMap({ alt, ctrl, key, shift })) return
         if (
           key === mapKey &&
           shiftKey === shift &&
@@ -77,7 +82,7 @@ export default class Editable {
     )
   }
 
-  #_isNewLineKeyMap({ alt, ctrl, key, shift }: Required<KeyMappingType>) {
+  private isNewLineKeyMap({ alt, ctrl, key, shift }: Required<KeyMappingType>) {
     if (key !== ENTERKEY || alt) return false
 
     if (ctrl && shift) return this.newLine === 'all'
