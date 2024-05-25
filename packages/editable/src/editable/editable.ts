@@ -2,9 +2,13 @@ import {
   AtLeastOne,
   KeyListenerType,
   KeyMappingType,
-  NewLineType
+  NewLineType,
+  BACKSPACEKEY,
+  DELETEKEY,
+  ENTERKEY,
+  isEndOfLine,
+  isEmptyLine
 } from '../utils'
-import { BACKSPACEKEY, DELETEKEY, ENTERKEY } from '../utils/const'
 
 import './editable.css'
 
@@ -29,6 +33,8 @@ export default class Editable {
 
     this.editable.contentEditable = 'true'
     this.editable.style.outline = 'none'
+    this.editable.style.whiteSpace = 'pre-wrap'
+
     if (params?.placeholder)
       this.editable.setAttribute('placeholder', params.placeholder)
 
@@ -38,14 +44,19 @@ export default class Editable {
       const { key, altKey, ctrlKey, shiftKey } = ev
       if (key === ENTERKEY) ev.preventDefault()
 
-      if (!altKey && !ctrlKey && !shiftKey)
-        if (
-          this.editable.childNodes.length === 0 &&
-          (key === BACKSPACEKEY || key === DELETEKEY)
-        ) {
-          ev.preventDefault()
-          return this.onDeleteWhenEmpty(key)
+      if (!altKey && !ctrlKey && !shiftKey) {
+        if (key === BACKSPACEKEY || key === DELETEKEY) {
+          if (this.editable.childNodes.length === 0) {
+            ev.preventDefault()
+            this.onDeleteWhenEmpty(key)
+            return
+          } else {
+            const firstChild = this.editable.childNodes[0]
+            if (firstChild.textContent === '\n' || firstChild.nodeName === 'br')
+              this.editable.removeChild(firstChild)
+          }
         }
+      }
 
       this.#_executeKeyListeners(ev)
       this.onNewLine(ev)
@@ -96,14 +107,36 @@ export default class Editable {
   }
 
   protected addNewLine() {
-    this.editable.appendChild(document.createElement('br'))
-    this.editable.appendChild(document.createElement('br'))
+    const selection = window.getSelection()
+    if (selection) {
+      const range = selection.getRangeAt(0)
+
+      range.deleteContents()
+      range.collapse(true)
+
+      if (isEndOfLine(range) || isEmptyLine(range))
+        range.insertNode(document.createTextNode('\n'))
+      range.insertNode(document.createTextNode('\n'))
+    }
   }
 
   focus(position?: number | 'start' | 'end') {
     this.editable.focus()
 
     if (position === 'end') this.moveCursorToEnd()
+  }
+
+  protected getCaretPosition() {
+    const selection = window.getSelection()
+    const node =
+      this.editable.childNodes.length > 0
+        ? this.editable.childNodes[0]
+        : this.editable
+
+    return {
+      node: selection?.anchorNode ?? node,
+      offset: selection?.anchorOffset ?? 0
+    }
   }
 
   protected moveCursorTo(position: number | [number, number]) {
