@@ -8,16 +8,11 @@ import {
   ENTERKEY,
   isEndOfLine,
   isEmptyLine,
-  getNextLineSibling
+  getNextLineSibling,
+  NewEditableParams
 } from '../utils'
 
 import './editable.css'
-
-type NewEditableParams = {
-  newLine?: NewLineType
-  element?: HTMLDivElement | null
-  placeholder?: string
-}
 
 export default class Editable {
   private onDeleteWhenEmpty: (
