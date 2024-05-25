@@ -15,9 +15,7 @@ import {
 import './editable.css'
 
 export default class Editable {
-  private onDeleteWhenEmpty: (
-    key: typeof BACKSPACEKEY | typeof DELETEKEY
-  ) => void = () => {}
+  private onDeleteWhenEmpty: (key: typeof BACKSPACEKEY | typeof DELETEKEY) => void = () => {}
 
   protected readonly editable: HTMLDivElement
   protected keyListeners: Array<KeyListenerType> = []
@@ -31,8 +29,7 @@ export default class Editable {
     this.editable.style.outline = 'none'
     this.editable.style.whiteSpace = 'pre-wrap'
 
-    if (params?.placeholder)
-      this.editable.setAttribute('placeholder', params.placeholder)
+    if (params?.placeholder) this.editable.setAttribute('placeholder', params.placeholder)
 
     this.editable.addEventListener('emptied', () => {})
 
@@ -47,9 +44,8 @@ export default class Editable {
             this.onDeleteWhenEmpty(key)
             return
           } else {
-            const firstChild = this.editable.childNodes[0]
-            if (firstChild.textContent === '\n' || firstChild.nodeName === 'br')
-              this.editable.removeChild(firstChild)
+            const firstChild = this.editable.childNodes.item(0)
+            if (firstChild.textContent === '\n' || firstChild.nodeName === 'br') this.editable.removeChild(firstChild)
           }
         }
       }
@@ -59,25 +55,11 @@ export default class Editable {
     })
   }
 
-  private executeKeyListeners({
-    key,
-    shiftKey,
-    altKey,
-    ctrlKey
-  }: KeyboardEvent) {
+  private executeKeyListeners({ key, shiftKey, altKey, ctrlKey }: KeyboardEvent) {
     this.keyListeners.forEach(
-      ({
-        keyMap: { alt = false, ctrl = false, key: mapKey = '', shift = false },
-        listener
-      }) => {
+      ({ keyMap: { alt = false, ctrl = false, key: mapKey = '', shift = false }, listener }) => {
         if (this.isNewLineKeyMap({ alt, ctrl, key, shift })) return
-        if (
-          key === mapKey &&
-          shiftKey === shift &&
-          altKey === alt &&
-          ctrlKey === ctrl
-        )
-          listener()
+        if (key === mapKey && shiftKey === shift && altKey === alt && ctrlKey === ctrl) listener()
       }
     )
   }
@@ -103,10 +85,7 @@ export default class Editable {
     this.newLine = newLine
   }
 
-  addKeyListener(
-    keyMap: KeyMappingType,
-    action: (editable?: Editable) => void
-  ) {
+  addKeyListener(keyMap: KeyMappingType, action: (editable?: Editable) => void) {
     this.keyListeners.push({ keyMap, listener: () => action(this) })
   }
 
@@ -136,10 +115,7 @@ export default class Editable {
 
   protected getCaretPosition() {
     const selection = window.getSelection()
-    const node =
-      this.editable.childNodes.length > 0
-        ? this.editable.childNodes[0]
-        : this.editable
+    const node = this.editable.childNodes.length > 0 ? this.editable.childNodes[0] : this.editable
 
     return {
       node: selection?.anchorNode ?? node,
@@ -177,9 +153,7 @@ export default class Editable {
     if (newLine && newLine === this.NewLine) this.addNewLine()
   }
 
-  setOnDeleteWhenEmpty(
-    action: (_key: typeof BACKSPACEKEY | typeof DELETEKEY) => void
-  ) {
+  setOnDeleteWhenEmpty(action: (_key: typeof BACKSPACEKEY | typeof DELETEKEY) => void) {
     this.onDeleteWhenEmpty = action
   }
 }
