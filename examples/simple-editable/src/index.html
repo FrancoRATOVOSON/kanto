@@ -1,17 +1,20 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="w-screen min-h-screen overflow-x-hidden">
   <head>
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title>Simple Editable</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css" />
     <script type="module" src="index.ts"></script>
   </head>
-  <body class="h-screen">
-    <div class="w-full h-full flex justify-center items-center">
-      <div class="flex flex-col gap-2 w-11/12">
+  <body>
+    <div class="w-full h-full flex flex-col gap-6 p-6">
+      <div class="flex flex-col gap-2 w-full">
         <h2>Simple Editor</h2>
-        <div id="editor" class="border border-slate-600 rounded-md px-2 py-1 w-full flex flex-col gap-2">
+        <div id="editor" class="border border-slate-600 rounded-md px-2 py-1 w-full flex flex-col gap-2"></div>
       </div>
+      <div class="flex flex-col gap-2 w-full">
+        <h2>Rich Editor</h2>
+        <div id="rich-editor" class="border border-slate-600 rounded-md px-2 py-1 w-full flex flex-col gap-2"></div>
       </div>
     </div>
   </body>
