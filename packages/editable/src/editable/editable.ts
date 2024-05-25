@@ -7,7 +7,8 @@ import {
   DELETEKEY,
   ENTERKEY,
   isEndOfLine,
-  isEmptyLine
+  isEmptyLine,
+  getNextLineSibling
 } from '../utils'
 
 import './editable.css'
@@ -117,13 +118,16 @@ export default class Editable {
       if (isEndOfLine(range) || isEmptyLine(range))
         range.insertNode(document.createTextNode('\n'))
       range.insertNode(document.createTextNode('\n'))
+
+      const newLineNode = getNextLineSibling(range.startContainer)
+      if (newLineNode) this.moveCursorTo(newLineNode)
     }
   }
 
   focus(position?: number | 'start' | 'end') {
     this.editable.focus()
 
-    if (position === 'end') this.moveCursorToEnd()
+    if (position === 'end') this.moveCursorTo(this.editable)
   }
 
   protected getCaretPosition() {
@@ -139,30 +143,13 @@ export default class Editable {
     }
   }
 
-  protected moveCursorTo(position: number | [number, number]) {
+  protected moveCursorTo(node: Node, position: number = 0) {
     const range = document.createRange()
     const selection = window.getSelection()
-    const rangeNodeIndex =
-      typeof position === 'number' ||
-      position[0] >= this.editable.childNodes.length
-        ? 0
-        : position[0]
-    const rangeNode =
-      rangeNodeIndex === 0
-        ? this.editable
-        : this.editable.childNodes[rangeNodeIndex]
-
-    range.setStart(
-      rangeNode,
-      typeof position === 'number' ? position : position[1]
-    )
+    range.setStart(node, position)
     range.collapse(true)
     selection?.removeAllRanges()
     selection?.addRange(range)
-  }
-
-  protected moveCursorToEnd() {
-    this.moveCursorTo(this.editable.childNodes.length)
   }
 
   protected onNewLine(ev: KeyboardEvent) {
@@ -183,10 +170,7 @@ export default class Editable {
       else newLine = 'basic'
     }
 
-    if (newLine && newLine === this.NewLine) {
-      this.addNewLine()
-      this.moveCursorToEnd()
-    }
+    if (newLine && newLine === this.NewLine) this.addNewLine()
   }
 
   setOnDeleteWhenEmpty(

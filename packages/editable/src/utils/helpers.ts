@@ -13,3 +13,11 @@ export function isEmptyLine(range: Range) {
     range.startContainer.textContent.length === 0
   )
 }
+
+export function getNextLineSibling(node: Node) {
+  const sibling = node.nextSibling
+
+  if (!sibling) return null
+  if (sibling.textContent !== '\n') return sibling
+  return getNextLineSibling(sibling)
+}
