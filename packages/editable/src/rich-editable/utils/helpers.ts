@@ -65,13 +65,13 @@ export function getTokenFromNode(node: Node, style?: InlineStyleAction): RitchTe
   if (style) {
     if (typeof style !== 'string') tokenType = style
     else tokenType = 'text'
-  } else tokenType = node.nodeName === 'a' ? { href: (node as HTMLAnchorElement).href } : 'text'
+  } else tokenType = node.nodeName.toLowerCase() === 'a' ? { href: (node as HTMLAnchorElement).href } : 'text'
 
   return {
     content: textContent,
     type: tokenType,
     style:
-      node.nodeName === 'span'
+      node.nodeName.toLowerCase() === 'span'
         ? {
             bold: !(style === 'bold' && !!fontWeight),
             code: !(style === 'code' && !!inlineCode),

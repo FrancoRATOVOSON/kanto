@@ -45,7 +45,8 @@ export default class Editable {
             return
           } else {
             const firstChild = this.editable.childNodes.item(0)
-            if (firstChild.textContent === '\n' || firstChild.nodeName === 'br') this.editable.removeChild(firstChild)
+            if (firstChild.textContent === '\n' || firstChild.nodeName.toLowerCase() === 'br')
+              this.editable.removeChild(firstChild)
           }
         }
       }

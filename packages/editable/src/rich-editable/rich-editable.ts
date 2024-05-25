@@ -33,8 +33,11 @@ export default class RichEditable extends Editable {
     const selectionContent = range.extractContents()
     const selectionTokens = childNodesToTokenList(selectionContent, style)
 
-    for (const token of selectionTokens) {
-      const element = tokenToElements(token)
+    console.log(selectionContent)
+    console.log(selectionTokens)
+
+    for (let index = selectionTokens.length - 1; index >= 0; index--) {
+      const element = tokenToElements(selectionTokens[index])
       console.log(element)
       range.insertNode(element)
     }
