@@ -47,5 +47,10 @@ export default [
         }
       ]
     }
+  },
+  {
+    rules: {
+      'prettier/prettier': 'warn'
+    }
   }
 ]
