@@ -19,3 +19,5 @@ export type RitchTextToken = {
   type: RitchTextType
   style?: AtLeastOne<RichTextStyle>
 }
+
+export type InlineStyleAction = 'bold' | 'italic' | 'underline' | 'linethrough' | 'code' | { href: string }
