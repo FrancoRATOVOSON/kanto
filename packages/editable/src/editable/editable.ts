@@ -98,8 +98,11 @@ export default class Editable {
     this.newLine = newLine
   }
 
-  addKeyListener(keyMap: KeyMappingType, listener: () => void) {
-    this.keyListeners.push({ keyMap, listener })
+  addKeyListener(
+    keyMap: KeyMappingType,
+    action: (editable?: Editable) => void
+  ) {
+    this.keyListeners.push({ keyMap, listener: () => action(this) })
   }
 
   protected addNewLine() {
