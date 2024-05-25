@@ -1,1 +1,1 @@
-export const latitude = 18
+export * from './editable'
