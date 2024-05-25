@@ -1,5 +1,11 @@
 export type NewLineType = 'basic' | 'shift' | 'ctrl' | 'all'
 
+export type NewEditableParams = {
+  newLine?: NewLineType
+  element?: HTMLDivElement | null
+  placeholder?: string
+}
+
 export type KeyMappingType = {
   key?: string
   alt?: boolean
