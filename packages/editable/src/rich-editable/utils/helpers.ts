@@ -44,7 +44,13 @@ function getStyleFromDefault(style: AtLeastOne<StyleOptions>): RichTextStyle | u
   if (!style) return undefined
   if (typeof style.style !== 'string') return style.default
 
-  const newStyle: RichTextStyle = { bold: false, italic: false, underlined: false, code: false, linethrough: false }
+  const newStyle: RichTextStyle = {
+    bold: false,
+    italic: false,
+    underlined: false,
+    code: false,
+    linethrough: false
+  }
 
   INLINE_STYLE_ACTION.forEach(inlineStyle => {
     newStyle[inlineStyle] = style.style === inlineStyle
@@ -57,12 +63,51 @@ function getStyleFromDefault(style: AtLeastOne<StyleOptions>): RichTextStyle | u
   return newStyle
 }
 
-export function getTokenFromNode(node: Node, style?: AtLeastOne<StyleOptions>): RitchTextToken | null {
+function getElementDefaultStyle(element: Element): RichTextStyle {
+  return {
+    bold: INLINE_STYLE_ACTION[0] === element.getAttribute(FONTWEIGHT_ATTRIBUTE),
+    italic: INLINE_STYLE_ACTION[1] === element.getAttribute(FONTSTYLE_ATTRIBUTE),
+    underlined: INLINE_STYLE_ACTION[2] === element.getAttribute(INLINECODE_ATTRIBUTE),
+    linethrough: INLINE_STYLE_ACTION[3] === element.getAttribute(LINETHROUGH_ATTRIBUTE),
+    code: INLINE_STYLE_ACTION[4] === element.getAttribute(INLINECODE_ATTRIBUTE)
+  }
+}
+
+function updateStyleBasedOnToggle(
+  defaultStyle: RichTextStyle,
+  style: Exclude<InlineStyleAction, { href: string }>
+) {
+  return {
+    bold: !(style === 'bold' && defaultStyle.bold),
+    italic: !(style === 'italic' && defaultStyle.italic),
+    underlined: !(style === 'underlined' && defaultStyle.underlined),
+    linethrough: !(style === 'linethrough' && defaultStyle.linethrough),
+    code: !(style === 'code' && defaultStyle.code)
+  }
+}
+
+function hasEffectiveStyle(
+  defaultStyle: RichTextStyle,
+  tokenType: RitchTextType,
+  style?: AtLeastOne<StyleOptions>
+): boolean {
+  const hasAttributes = Object.values(defaultStyle).some(value => value === true)
+  return (
+    tokenType !== 'text' ||
+    (tokenType === 'text' && (hasAttributes || typeof style?.style === 'string'))
+  )
+}
+
+export function getTokenFromNode(
+  node: Node,
+  style?: AtLeastOne<StyleOptions>
+): RitchTextToken | null {
   const textContent = node.textContent
   if (!textContent) return null
   if (node.nodeType !== Node.TEXT_NODE && node.nodeType !== Node.ELEMENT_NODE) return null
 
-  let tokenType: RitchTextType = !style?.style || typeof style.style === 'string' ? 'text' : style.style
+  let tokenType: RitchTextType =
+    !style?.style || typeof style.style === 'string' ? 'text' : style.style
 
   if (node.nodeType === Node.TEXT_NODE)
     return {
@@ -71,30 +116,19 @@ export function getTokenFromNode(node: Node, style?: AtLeastOne<StyleOptions>): 
       style: style ? getStyleFromDefault(style) : undefined
     }
 
-  const fontWeight = (node as Element).getAttribute(FONTWEIGHT_ATTRIBUTE)
-  const fontStyle = (node as Element).getAttribute(FONTSTYLE_ATTRIBUTE)
-  const inlineCode = (node as Element).getAttribute(INLINECODE_ATTRIBUTE)
-  const underlined = (node as Element).getAttribute(UNDERLINED_ATTRIBUTE)
-  const linethrough = (node as Element).getAttribute(LINETHROUGH_ATTRIBUTE)
+  let defaultStyle: RichTextStyle = getElementDefaultStyle(node as Element)
 
-  if (style?.style) {
-    if (typeof style.style !== 'string') tokenType = style.style
-    else tokenType = 'text'
-  } else tokenType = node.nodeName.toLowerCase() === 'a' ? { href: (node as HTMLAnchorElement).href } : 'text'
+  if (style && typeof style.style === 'string') {
+    defaultStyle = updateStyleBasedOnToggle(defaultStyle, style.style)
+  } else if (node.nodeName.toLowerCase() === 'a')
+    tokenType = { href: (node as HTMLAnchorElement).href }
+
+  const hasStyle = hasEffectiveStyle(defaultStyle, tokenType, style)
 
   return {
     content: textContent,
     type: tokenType,
-    style:
-      node.nodeName.toLowerCase() === 'span'
-        ? {
-            bold: !(style?.style === 'bold' && !!fontWeight),
-            code: !(style?.style === 'code' && !!inlineCode),
-            italic: !(style?.style === 'italic' && !!fontStyle),
-            linethrough: !(style?.style === 'linethrough' && !!linethrough),
-            underlined: !(style?.style === 'underlined' && !!underlined)
-          }
-        : undefined
+    style: hasStyle ? defaultStyle : undefined
   }
 }
 
@@ -102,7 +136,8 @@ export function tokenToElements(token: RitchTextToken): Node {
   const { content, type: tokenType, style } = token
   const textContent = document.createTextNode(content)
 
-  if (tokenType === 'text' && !style) return textContent
+  if (tokenType === 'text' && (!style || !Object.values(style).some(value => value === true)))
+    return textContent
 
   let element: HTMLSpanElement | HTMLAnchorElement
 
@@ -121,9 +156,26 @@ export function tokenToElements(token: RitchTextToken): Node {
   }
 
   element.appendChild(textContent)
-
   return element
 }
+
+export function getElementStyle(element: Element): RichTextStyle {
+  const fontWeight = element.getAttribute(FONTWEIGHT_ATTRIBUTE)
+  const fontStyle = element.getAttribute(FONTSTYLE_ATTRIBUTE)
+  const inlineCode = element.getAttribute(INLINECODE_ATTRIBUTE)
+  const underlined = element.getAttribute(UNDERLINED_ATTRIBUTE)
+  const linethrough = element.getAttribute(LINETHROUGH_ATTRIBUTE)
+
+  return {
+    bold: !!fontWeight,
+    code: !!inlineCode,
+    italic: !!fontStyle,
+    linethrough: !!linethrough,
+    underlined: !!underlined
+  }
+}
+
+/// ///////////////////////////////////////////////////////////////////////////////////////
 
 export function getRangePosition(range: Range) {
   const parent =
@@ -175,20 +227,4 @@ export function getPositionWithinParent(parent: Node, child: Node, childOffset: 
     pos += (parent as Element).outerHTML.lastIndexOf((parent as Element).innerHTML)
   }
   return pos
-}
-
-export function getElementStyle(element: Element): RichTextStyle {
-  const fontWeight = element.getAttribute(FONTWEIGHT_ATTRIBUTE)
-  const fontStyle = element.getAttribute(FONTSTYLE_ATTRIBUTE)
-  const inlineCode = element.getAttribute(INLINECODE_ATTRIBUTE)
-  const underlined = element.getAttribute(UNDERLINED_ATTRIBUTE)
-  const linethrough = element.getAttribute(LINETHROUGH_ATTRIBUTE)
-
-  return {
-    bold: !!fontWeight,
-    code: !!inlineCode,
-    italic: !!fontStyle,
-    linethrough: !!linethrough,
-    underlined: !!underlined
-  }
 }
