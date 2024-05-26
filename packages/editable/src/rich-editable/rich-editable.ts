@@ -21,6 +21,9 @@ export default class RichEditable extends Editable {
         } else if (key === 'u') {
           ev.preventDefault()
           this.toggleStyle('underlined')
+        } else if (key === 'e') {
+          ev.preventDefault()
+          this.toggleStyle('code')
         }
       }
     })
