@@ -46,10 +46,6 @@ export default class RichEditable extends Editable {
           ? range.startContainer
           : range.startContainer.parentElement
       const currentStyle = getElementStyle(element as Element)
-      const selectionTokens = childNodesToTokenList(range.cloneContents(), {
-        style,
-        default: currentStyle
-      })
 
       const textContent = element.textContent ?? range.toString()
       const elementType =
@@ -68,7 +64,12 @@ export default class RichEditable extends Editable {
           element
         )
 
-      const selectionElement = tokenToElements(selectionTokens[0])
+      const selectionElement = tokenToElements(
+        childNodesToTokenList(range.cloneContents(), {
+          style,
+          default: currentStyle
+        })[0]
+      )
       this.editable.insertBefore(selectionElement, element)
 
       const textAfter = textContent.slice(range.endOffset)
@@ -92,65 +93,6 @@ export default class RichEditable extends Editable {
 
     if (isSignleNodeSelection && !isDirectChild) breakElement()
     else insertStyle()
-
-    // if (range.startContainer === range.endContainer) {
-    //   if (range.startContainer.parentElement && range.startContainer.parentElement === this.editable) {
-    //     const selectionContent = range.extractContents()
-    //     const selectionTokens = childNodesToTokenList(selectionContent, { style })
-
-    //     for (let index = selectionTokens.length - 1; index >= 0; index--) {
-    //       const element = tokenToElements(selectionTokens[index])
-    //       range.insertNode(element)
-    //     }
-    //   } else {
-    //     const element =
-    //       range.startContainer.nodeType === Node.ELEMENT_NODE || !range.startContainer.parentElement
-    //         ? range.startContainer
-    //         : range.startContainer.parentElement
-    //     const currentStyle = getElementStyle(element as Element)
-    //     const selectionTokens = childNodesToTokenList(range.cloneContents(), { style, default: currentStyle })
-
-    //     const textContent = element.textContent ?? range.toString()
-    //     const elementType =
-    //       element.nodeName.toLowerCase() === 'a' ? { href: (element as HTMLAnchorElement).href } : 'text'
-
-    //     const textBefore = textContent.slice(0, range.startOffset)
-    //     if (textBefore)
-    //       this.editable.insertBefore(
-    //         tokenToElements({
-    //           content: textBefore,
-    //           type: elementType,
-    //           style: currentStyle
-    //         }),
-    //         element
-    //       )
-
-    //     const selectionElement = tokenToElements(selectionTokens[0])
-    //     this.editable.insertBefore(selectionElement, element)
-
-    //     const textAfter = textContent.slice(range.endOffset)
-    //     if (textAfter)
-    //       this.editable.insertBefore(
-    //         tokenToElements({
-    //           content: textAfter,
-    //           type: elementType,
-    //           style: currentStyle
-    //         }),
-    //         element
-    //       )
-
-    //     this.editable.removeChild(element)
-    //     range.selectNodeContents(selectionElement)
-    //   }
-    // } else {
-    //   const selectionContent = range.extractContents()
-    //   const selectionTokens = childNodesToTokenList(selectionContent, { style })
-
-    //   for (let index = selectionTokens.length - 1; index >= 0; index--) {
-    //     const element = tokenToElements(selectionTokens[index])
-    //     range.insertNode(element)
-    //   }
-    // }
 
     selection.removeAllRanges()
     selection.addRange(range)

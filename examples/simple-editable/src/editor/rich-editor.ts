@@ -5,7 +5,9 @@ let editorLines: Array<RichEditable> = []
 
 function addLine(editable: RichEditable) {
   editorLines.push(editable)
-  editable.addKeyListener({ key: 'Enter', ctrl: true }, () => addLine(new RichEditable({ newLine: 'basic' })))
+  editable.addKeyListener({ key: 'Enter', ctrl: true }, () =>
+    addLine(new RichEditable({ newLine: 'basic' }))
+  )
   editable.setOnDeleteWhenEmpty(key => {
     const currentIndex = editorLines.findIndex(line => line === editable)
     const backspace = key === 'Backspace' && currentIndex > 0
@@ -23,4 +25,5 @@ function addLine(editable: RichEditable) {
   editable.Element.focus()
 }
 
-export const setup = () => addLine(new RichEditable({ newLine: 'basic', placeholder: 'First Line' }))
+export const setup = () =>
+  addLine(new RichEditable({ newLine: 'basic', placeholder: 'First Line' }))
