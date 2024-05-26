@@ -67,9 +67,9 @@ function getElementDefaultStyle(element: Element): RichTextStyle {
   return {
     bold: INLINE_STYLE_ACTION[0] === element.getAttribute(FONTWEIGHT_ATTRIBUTE),
     italic: INLINE_STYLE_ACTION[1] === element.getAttribute(FONTSTYLE_ATTRIBUTE),
-    underlined: INLINE_STYLE_ACTION[2] === element.getAttribute(INLINECODE_ATTRIBUTE),
-    linethrough: INLINE_STYLE_ACTION[3] === element.getAttribute(LINETHROUGH_ATTRIBUTE),
-    code: INLINE_STYLE_ACTION[4] === element.getAttribute(INLINECODE_ATTRIBUTE)
+    underlined: element.getAttribute(INLINECODE_ATTRIBUTE) === 'true',
+    linethrough: element.getAttribute(LINETHROUGH_ATTRIBUTE) === 'true',
+    code: element.getAttribute(INLINECODE_ATTRIBUTE) === 'true'
   }
 }
 
@@ -149,10 +149,10 @@ export function tokenToElements(token: RitchTextToken): Node {
 
   if (style) {
     if (style.bold) element.setAttribute(FONTWEIGHT_ATTRIBUTE, 'bold')
-    if (style.code) element.setAttribute(INLINECODE_ATTRIBUTE, 'true')
     if (style.italic) element.setAttribute(FONTSTYLE_ATTRIBUTE, 'italic')
-    if (style.linethrough) element.setAttribute(LINETHROUGH_ATTRIBUTE, 'true')
     if (style.underlined) element.setAttribute(UNDERLINED_ATTRIBUTE, 'true')
+    if (style.linethrough) element.setAttribute(LINETHROUGH_ATTRIBUTE, 'true')
+    if (style.code) element.setAttribute(INLINECODE_ATTRIBUTE, 'true')
   }
 
   element.appendChild(textContent)

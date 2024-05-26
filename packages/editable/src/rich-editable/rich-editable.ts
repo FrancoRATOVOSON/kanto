@@ -18,6 +18,9 @@ export default class RichEditable extends Editable {
         } else if (key === 'i') {
           ev.preventDefault()
           this.toggleStyle('italic')
+        } else if (key === 'u') {
+          ev.preventDefault()
+          this.toggleStyle('underlined')
         }
       }
     })

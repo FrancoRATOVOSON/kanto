@@ -7,15 +7,17 @@ div[contenteditable='true'] {
     font-style: italic;
   }
 
-  [data-text-underlined='underlined'] {
-    text-decoration: underline;
+  [data-text-underlined='true'] {
+    color: inherit;
+    border-bottom: 0.05em solid;
+    word-wrap: break-word;
   }
 
-  [data-text-linethrough='linethrough'] {
+  [data-text-linethrough='true'] {
     text-decoration: line-through;
   }
 
-  [data-inline-code='code'] {
+  [data-inline-code='true'] {
     font-size: 80%;
     padding: 0.2em 0.4em;
     background-color: rgba(120, 120, 120, 0.15);
