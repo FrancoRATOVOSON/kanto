@@ -38,6 +38,12 @@ importers:
       parcel:
         specifier: ^2.12.0
         version: 2.12.0(@swc/helpers@0.5.11)(postcss@8.4.38)(typescript@5.4.5)
+      postcss:
+        specifier: ^8.4.38
+        version: 8.4.38
+      postcss-nested:
+        specifier: ^6.0.1
+        version: 6.0.1(postcss@8.4.38)
       prettier:
         specifier: ^3.2.5
         version: 3.2.5
