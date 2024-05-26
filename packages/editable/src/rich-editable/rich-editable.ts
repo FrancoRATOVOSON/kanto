@@ -11,19 +11,26 @@ export default class RichEditable extends Editable {
 
     this.editable.addEventListener('keydown', ev => {
       const { key, ctrlKey, altKey, shiftKey } = ev
-      if (ctrlKey && !altKey && !shiftKey) {
-        if (key === 'b') {
-          ev.preventDefault()
-          this.toggleStyle('bold')
-        } else if (key === 'i') {
-          ev.preventDefault()
-          this.toggleStyle('italic')
-        } else if (key === 'u') {
-          ev.preventDefault()
-          this.toggleStyle('underlined')
-        } else if (key === 'e') {
-          ev.preventDefault()
-          this.toggleStyle('code')
+      if (ctrlKey && !altKey) {
+        if (!shiftKey) {
+          if (key === 'b') {
+            ev.preventDefault()
+            this.toggleStyle('bold')
+          } else if (key === 'i') {
+            ev.preventDefault()
+            this.toggleStyle('italic')
+          } else if (key === 'u') {
+            ev.preventDefault()
+            this.toggleStyle('underlined')
+          } else if (key === 'e') {
+            ev.preventDefault()
+            this.toggleStyle('code')
+          }
+        } else {
+          if (key === 'X') {
+            ev.preventDefault()
+            this.toggleStyle('linethrough')
+          }
         }
       }
     })
