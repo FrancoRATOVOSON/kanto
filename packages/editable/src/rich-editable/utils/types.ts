@@ -1,4 +1,5 @@
 import { AtLeastOne } from '../../utils'
+import { INLINE_STYLE_ACTION } from './const'
 
 export type RitchTextType =
   | 'text'
@@ -6,18 +7,12 @@ export type RitchTextType =
       href: string
     }
 
-export type RichTextStyle = {
-  bold: boolean
-  italic: boolean
-  underlined: boolean
-  linethrough: boolean
-  code: boolean
-}
+export type InlineStyleAction = (typeof INLINE_STYLE_ACTION)[number] | { href: string }
+
+export type RichTextStyle = Record<Exclude<InlineStyleAction, { href: string }>, boolean>
 
 export type RitchTextToken = {
   content: string
   type: RitchTextType
   style?: AtLeastOne<RichTextStyle>
 }
-
-export type InlineStyleAction = 'bold' | 'italic' | 'underline' | 'linethrough' | 'code' | { href: string }

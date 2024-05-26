@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "description": "An HTML contenteditable javascript toolkit",
   "source": "src/index.ts",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
-  "types": "dist/types.d.ts",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    }
   },
   "scripts": {
     "watch": "parcel watch",

@@ -1,13 +1,20 @@
+import { AtLeastOne } from '../../utils'
 import {
   FONTSTYLE_ATTRIBUTE,
   FONTWEIGHT_ATTRIBUTE,
   INLINECODE_ATTRIBUTE,
+  INLINE_STYLE_ACTION,
   LINETHROUGH_ATTRIBUTE,
   UNDERLINED_ATTRIBUTE
 } from './const'
-import { InlineStyleAction, RitchTextToken, RitchTextType } from './types'
+import { InlineStyleAction, RichTextStyle, RitchTextToken, RitchTextType } from './types'
 
-export function childNodesToTokenList(parent: Node, style?: InlineStyleAction) {
+type StyleOptions = {
+  default: RichTextStyle
+  style: InlineStyleAction
+}
+
+export function childNodesToTokenList(parent: Node, style?: AtLeastOne<StyleOptions>) {
   const tokenList: Array<RitchTextToken> = []
 
   for (const [index, node] of parent.childNodes.entries()) {
@@ -18,7 +25,7 @@ export function childNodesToTokenList(parent: Node, style?: InlineStyleAction) {
     }
 
     if (index > 0) {
-      const lastToken = tokenList.at(-1)
+      const lastToken = tokenList[tokenList.length - 1]
       const prevNode = parent.childNodes.item(index - 1)
 
       if (lastToken && prevNode.nodeType === Node.TEXT_NODE && node.nodeType === Node.TEXT_NODE) {
@@ -33,27 +40,35 @@ export function childNodesToTokenList(parent: Node, style?: InlineStyleAction) {
   return tokenList
 }
 
-export function getTokenFromNode(node: Node, style?: InlineStyleAction): RitchTextToken | null {
+function getStyleFromDefault(style: AtLeastOne<StyleOptions>): RichTextStyle | undefined {
+  if (!style) return undefined
+  if (typeof style.style !== 'string') return style.default
+
+  const newStyle: RichTextStyle = { bold: false, italic: false, underlined: false, code: false, linethrough: false }
+
+  INLINE_STYLE_ACTION.forEach(inlineStyle => {
+    newStyle[inlineStyle] = style.style === inlineStyle
+    if (style.default) {
+      newStyle[inlineStyle] = style.default[inlineStyle]
+      if (style.style === inlineStyle) newStyle[inlineStyle] = !style.default[inlineStyle]
+    }
+  })
+
+  return newStyle
+}
+
+export function getTokenFromNode(node: Node, style?: AtLeastOne<StyleOptions>): RitchTextToken | null {
   const textContent = node.textContent
   if (!textContent) return null
   if (node.nodeType !== Node.TEXT_NODE && node.nodeType !== Node.ELEMENT_NODE) return null
 
-  let tokenType: RitchTextType = !style || typeof style === 'string' ? 'text' : style
+  let tokenType: RitchTextType = !style?.style || typeof style.style === 'string' ? 'text' : style.style
 
   if (node.nodeType === Node.TEXT_NODE)
     return {
       content: textContent,
       type: tokenType,
-      style:
-        typeof style === 'string'
-          ? {
-              bold: style === 'bold',
-              italic: style === 'italic',
-              code: style === 'code',
-              underlined: style === 'underline',
-              linethrough: style === 'linethrough'
-            }
-          : undefined
+      style: style ? getStyleFromDefault(style) : undefined
     }
 
   const fontWeight = (node as Element).getAttribute(FONTWEIGHT_ATTRIBUTE)
@@ -62,8 +77,8 @@ export function getTokenFromNode(node: Node, style?: InlineStyleAction): RitchTe
   const underlined = (node as Element).getAttribute(UNDERLINED_ATTRIBUTE)
   const linethrough = (node as Element).getAttribute(LINETHROUGH_ATTRIBUTE)
 
-  if (style) {
-    if (typeof style !== 'string') tokenType = style
+  if (style?.style) {
+    if (typeof style.style !== 'string') tokenType = style.style
     else tokenType = 'text'
   } else tokenType = node.nodeName.toLowerCase() === 'a' ? { href: (node as HTMLAnchorElement).href } : 'text'
 
@@ -73,11 +88,11 @@ export function getTokenFromNode(node: Node, style?: InlineStyleAction): RitchTe
     style:
       node.nodeName.toLowerCase() === 'span'
         ? {
-            bold: !(style === 'bold' && !!fontWeight),
-            code: !(style === 'code' && !!inlineCode),
-            italic: !(style === 'italic' && !!fontStyle),
-            linethrough: !(style === 'linethrough' && !!linethrough),
-            underlined: !(style === 'underline' && !!underlined)
+            bold: !(style?.style === 'bold' && !!fontWeight),
+            code: !(style?.style === 'code' && !!inlineCode),
+            italic: !(style?.style === 'italic' && !!fontStyle),
+            linethrough: !(style?.style === 'linethrough' && !!linethrough),
+            underlined: !(style?.style === 'underlined' && !!underlined)
           }
         : undefined
   }
@@ -160,4 +175,20 @@ export function getPositionWithinParent(parent: Node, child: Node, childOffset: 
     pos += (parent as Element).outerHTML.lastIndexOf((parent as Element).innerHTML)
   }
   return pos
+}
+
+export function getElementStyle(element: Element): RichTextStyle {
+  const fontWeight = element.getAttribute(FONTWEIGHT_ATTRIBUTE)
+  const fontStyle = element.getAttribute(FONTSTYLE_ATTRIBUTE)
+  const inlineCode = element.getAttribute(INLINECODE_ATTRIBUTE)
+  const underlined = element.getAttribute(UNDERLINED_ATTRIBUTE)
+  const linethrough = element.getAttribute(LINETHROUGH_ATTRIBUTE)
+
+  return {
+    bold: !!fontWeight,
+    code: !!inlineCode,
+    italic: !!fontStyle,
+    linethrough: !!linethrough,
+    underlined: !!underlined
+  }
 }

@@ -1,6 +1,6 @@
 import { Editable } from '../editable'
 import { AtLeastOne, NewEditableParams } from '../utils'
-import { childNodesToTokenList, tokenToElements } from './utils/helpers'
+import { childNodesToTokenList, getElementStyle, tokenToElements } from './utils/helpers'
 import { InlineStyleAction } from './utils/types'
 
 import './rich-editable.css'
@@ -30,16 +30,47 @@ export default class RichEditable extends Editable {
     const range = selection.getRangeAt(0)
     if (range.collapsed) return
 
-    const selectionContent = range.extractContents()
-    const selectionTokens = childNodesToTokenList(selectionContent, style)
+    if (range.startContainer === range.endContainer) {
+      if (this.editable.childNodes.length === 1 && range.startContainer === this.editable.firstChild) {
+        const selectionContent = range.extractContents()
+        const selectionTokens = childNodesToTokenList(selectionContent, { style })
 
-    console.log(selectionContent)
-    console.log(selectionTokens)
+        for (let index = selectionTokens.length - 1; index >= 0; index--) {
+          const element = tokenToElements(selectionTokens[index])
+          range.insertNode(element)
+        }
+      } else {
+        const element =
+          range.startContainer.nodeType === Node.ELEMENT_NODE || !range.startContainer.parentElement
+            ? range.startContainer
+            : range.startContainer.parentElement
+        const currentStyle = getElementStyle(element as Element)
+        const selectionContent = range.cloneContents()
+        const selectionTokens = childNodesToTokenList(selectionContent, { style, default: currentStyle })
 
-    for (let index = selectionTokens.length - 1; index >= 0; index--) {
-      const element = tokenToElements(selectionTokens[index])
-      console.log(element)
-      range.insertNode(element)
+        const textContent = element.textContent ?? range.toString()
+        const elementType =
+          element.nodeName.toLowerCase() === 'a' ? { href: (element as HTMLAnchorElement).href } : 'text'
+        const before = tokenToElements({
+          content: textContent.slice(0, range.startOffset),
+          type: elementType,
+          style: currentStyle
+        })
+        const after = tokenToElements({
+          content: textContent.slice(range.endOffset),
+          type: elementType,
+          style: currentStyle
+        })
+
+        this.editable.insertBefore(before, element)
+        const selectionElement = tokenToElements(selectionTokens[0])
+        this.editable.insertBefore(selectionElement, element)
+        this.editable.insertBefore(after, element)
+
+        this.editable.removeChild(element)
+
+        range.selectNodeContents(selectionElement)
+      }
     }
 
     selection.removeAllRanges()
